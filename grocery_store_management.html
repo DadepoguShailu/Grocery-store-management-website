@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreshMart - Grocery Store Management</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#16a34a;--dark:#14532d;--light:#f0fdf4;--bg:#f6f8f7;--text:#17201a;--muted:#6b7280;--danger:#dc2626;--warning:#d97706;--card:#fff;--border:#e5e7eb}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+.app{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#123b24;color:#fff;padding:24px 16px;position:fixed;height:100vh;left:0;top:0}
+.logo{font-size:24px;font-weight:800;padding:8px 12px 28px}
+.logo span{color:#86efac}
+.nav button{width:100%;background:transparent;color:#d1fae5;text-align:left;padding:13px 14px;border-radius:10px;margin:4px 0;font-weight:600}
+.nav button:hover,.nav button.active{background:#1f6b3d;color:#fff}
+.main{margin-left:245px;width:calc(100% - 245px);padding:25px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.topbar h1{font-size:27px}
+.topbar p{color:var(--muted);margin-top:4px}
+.btn{padding:10px 15px;border-radius:9px;font-weight:700}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-secondary{background:#fff;border:1px solid var(--border)}
+.btn-danger{background:#fee2e2;color:#991b1b}
+.btn-warning{background:#fef3c7;color:#92400e}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:19px;box-shadow:0 3px 12px #00000008}
+.stat{display:flex;justify-content:space-between;align-items:center}
+.stat .icon{width:45px;height:45px;border-radius:12px;background:var(--light);display:grid;place-items:center;font-size:22px}
+.stat h3{font-size:26px;margin:6px 0}
+.muted{color:var(--muted);font-size:13px}
+.section{margin-top:20px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-head h2{font-size:19px}
+.searchbar{display:flex;gap:10px;margin-bottom:15px}
+.searchbar input,.searchbar select,.form input,.form select{padding:11px 12px;border:1px solid #d1d5db;border-radius:9px;outline:none;background:#fff}
+.searchbar input{flex:1}
+.table-wrap{overflow:auto;background:#fff;border:1px solid var(--border);border-radius:13px}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:13px 15px;border-bottom:1px solid var(--border);text-align:left}
+th{background:#f9fafb;color:#4b5563;font-size:13px}
+td{font-size:14px}
+.badge{padding:5px 9px;border-radius:20px;font-size:12px;font-weight:700}
+.good{background:#dcfce7;color:#166534}.low{background:#fef3c7;color:#92400e}.out{background:#fee2e2;color:#991b1b}
+.actions{display:flex;gap:6px}
+.actions button{padding:7px 9px;border-radius:7px}
+.page{display:none}.page.active{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.form label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.form input,.form select{width:100%}
+.modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;padding:20px;z-index:10}
+.modal.show{display:grid}
+.modal-box{background:#fff;border-radius:16px;width:min(520px,100%);padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.close{background:#f3f4f6;border-radius:50%;width:32px;height:32px}
+.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
+.cart-layout{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.product{border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff}
+.product .emoji{font-size:32px;margin-bottom:8px}
+.product h3{font-size:15px}.product p{font-size:13px;color:var(--muted);margin:5px 0}
+.product .price{font-weight:800;color:var(--primary)}
+.product button{width:100%;margin-top:9px}
+.cart{background:#fff;border:1px solid var(--border);border-radius:14px;padding:17px}
+.cart-item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.qty{display:flex;align-items:center;gap:7px}.qty button{width:25px;height:25px;border-radius:6px;background:#f3f4f6}
+.total{font-size:20px;font-weight:800;display:flex;justify-content:space-between;margin:17px 0}
+.empty{text-align:center;padding:35px;color:var(--muted)}
+.toast{position:fixed;right:20px;bottom:20px;background:#123b24;color:#fff;padding:13px 18px;border-radius:10px;display:none;z-index:30}
+.toast.show{display:block}
+.invoice{max-width:800px;margin:auto;background:#fff;padding:30px;border:1px solid var(--border)}
+.invoice h1{color:var(--primary)}
+.invoice-head{display:flex;justify-content:space-between;margin-bottom:25px}
+@media(max-width:900px){.sidebar{width:190px}.main{margin-left:190px;width:calc(100% - 190px)}.grid{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:repeat(2,1fr)}.cart-layout{grid-template-columns:1fr}}
+@media(max-width:650px){.sidebar{position:static;width:100%;height:auto}.app{display:block}.main{margin-left:0;width:100%;padding:15px}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.grid{grid-template-columns:1fr 1fr}.products{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.topbar{align-items:flex-start;gap:10px}.topbar h1{font-size:21px}}
+@media print{.sidebar,.topbar,.no-print{display:none!important}.main{margin:0;width:100%;padding:0}.page{display:none!important}.page.invoice-page{display:block!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo">🛒 Fresh<span>Mart</span></div>
+  <div class="nav">
+    <button class="active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button onclick="showPage('products',this)">📦 Products</button>
+    <button onclick="showPage('billing',this)">🧾 Billing</button>
+    <button onclick="showPage('sales',this)">💰 Sales</button>
+  </div>
+</aside>
+
+<main class="main">
+<div class="topbar">
+ <div><h1 id="pageTitle">Dashboard</h1><p>Grocery Store Management System</p></div>
+ <button class="btn btn-primary" onclick="openProductModal()">＋ Add Product</button>
+</div>
+
+<section id="dashboard" class="page active">
+ <div class="grid">
+  <div class="card stat"><div><span class="muted">Total Products</span><h3 id="statProducts">0</h3></div><div class="icon">📦</div></div>
+  <div class="card stat"><div><span class="muted">Stock Units</span><h3 id="statStock">0</h3></div><div class="icon">🧺</div></div>
+  <div class="card stat"><div><span class="muted">Today's Sales</span><h3 id="statSales">₹0</h3></div><div class="icon">💰</div></div>
+  <div class="card stat"><div><span class="muted">Low Stock</span><h3 id="statLow">0</h3></div><div class="icon">⚠️</div></div>
+ </div>
+ <div class="section grid" style="grid-template-columns:1.5fr 1fr">
+  <div class="card"><div class="section-head"><h2>Recent Sales</h2><button class="btn btn-secondary" onclick="showPage('sales')">View All</button></div><div id="recentSales"></div></div>
+  <div class="card"><div class="section-head"><h2>Low Stock Alert</h2></div><div id="lowStock"></div></div>
+ </div>
+</section>
+
+<section id="products" class="page">
+ <div class="card">
+  <div class="searchbar"><input id="productSearch" placeholder="🔍 Search products..." oninput="renderProducts()"><select id="categoryFilter" onchange="renderProducts()"><option value="">All Categories</option></select></div>
+  <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productTable"></tbody></table></div>
+ </div>
+</section>
+
+<section id="billing" class="page">
+ <div class="cart-layout">
+  <div class="card"><div class="section-head"><h2>Products</h2></div><div class="searchbar"><input id="billSearch" placeholder="Search products..." oninput="renderBillProducts()"></div><div class="products" id="billProducts"></div></div>
+  <div class="cart"><div class="section-head"><h2>🛒 Current Bill</h2><button class="btn btn-danger" onclick="clearCart()">Clear</button></div><div id="cartItems"></div><div class="total"><span>Total</span><span id="cartTotal">₹0</span></div><button class="btn btn-primary" style="width:100%" onclick="checkout()">Complete Sale</button></div>
+ </div>
+</section>
+
+<section id="sales" class="page">
+ <div class="card"><div class="section-head"><h2>Sales History</h2><button class="btn btn-secondary" onclick="clearSales()">Clear History</button></div>
+ <div class="table-wrap"><table><thead><tr><th>Invoice</th><th>Date</th><th>Items</th><th>Total</th></tr></thead><tbody id="salesTable"></tbody></table></div></div>
+</section>
+
+<section id="invoicePage" class="page invoice-page"></section>
+</main>
+</div>
+
+<div class="modal" id="productModal">
+ <div class="modal-box">
+  <div class="modal-head"><h2 id="modalTitle">Add Product</h2><button class="close" onclick="closeProductModal()">×</button></div>
+  <form class="form" onsubmit="saveProduct(event)">
+   <input type="hidden" id="productId">
+   <div class="form-grid">
+    <div><label>Product Name</label><input id="pName" required placeholder="e.g. Rice 5kg"></div>
+    <div><label>Category</label><select id="pCategory" required><option>Fruits</option><option>Vegetables</option><option>Dairy</option><option>Bakery</option><option>Staples</option><option>Beverages</option><option>Snacks</option><option>Household</option></select></div>
+    <div><label>Price (₹)</label><input id="pPrice" type="number" min="0" step="0.01" required></div>
+    <div><label>Stock Quantity</label><input id="pStock" type="number" min="0" required></div>
+    <div><label>Unit</label><select id="pUnit"><option>pcs</option><option>kg</option><option>litre</option><option>pack</option></select></div>
+    <div><label>Emoji</label><input id="pEmoji" placeholder="🥦" maxlength="2"></div>
+   </div>
+   <div class="form-actions"><button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button><button class="btn btn-primary">Save Product</button></div>
+  </form>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const defaultProducts=[
+{id:1,name:"Rice 5kg",category:"Staples",price:420,stock:24,unit:"pack",emoji:"🍚"},
+{id:2,name:"Wheat Flour 5kg",category:"Staples",price:280,stock:18,unit:"pack",emoji:"🌾"},
+{id:3,name:"Fresh Milk 1L",category:"Dairy",price:65,stock:32,unit:"litre",emoji:"🥛"},
+{id:4,name:"Apples",category:"Fruits",price:180,stock:8,unit:"kg",emoji:"🍎"},
+{id:5,name:"Bananas",category:"Fruits",price:60,stock:30,unit:"kg",emoji:"🍌"},
+{id:6,name:"Tomatoes",category:"Vegetables",price:45,stock:6,unit:"kg",emoji:"🍅"},
+{id:7,name:"Potatoes",category:"Vegetables",price:40,stock:25,unit:"kg",emoji:"🥔"},
+{id:8,name:"Bread",category:"Bakery",price:45,stock:4,unit:"pcs",emoji:"🍞"},
+{id:9,name:"Orange Juice",category:"Beverages",price:120,stock:15,unit:"litre",emoji:"🧃"},
+{id:10,name:"Biscuits",category:"Snacks",price:30,stock:40,unit:"pack",emoji:"🍪"}
+];
+let products=JSON.parse(localStorage.getItem("freshmart_products"))||defaultProducts;
+let sales=JSON.parse(localStorage.getItem("freshmart_sales"))||[];
+let cart=[];
+
+function saveData(){localStorage.setItem("freshmart_products",JSON.stringify(products));localStorage.setItem("freshmart_sales",JSON.stringify(sales));}
+function money(n){return "₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2})}
+function showPage(id,btn){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+ if(btn)btn.classList.add("active");
+ const titles={dashboard:"Dashboard",products:"Products",billing:"Billing",sales:"Sales History"};
+ if(titles[id])document.getElementById("pageTitle").textContent=titles[id];
+ if(id==="dashboard")renderDashboard();
+ if(id==="products")renderProducts();
+ if(id==="billing")renderBillProducts();
+ if(id==="sales")renderSales();
+}
+function renderDashboard(){
+ document.getElementById("statProducts").textContent=products.length;
+ document.getElementById("statStock").textContent=products.reduce((a,p)=>a+Number(p.stock),0);
+ const today=new Date().toDateString();
+ const todaySales=sales.filter(s=>new Date(s.date).toDateString()===today).reduce((a,s)=>a+s.total,0);
+ document.getElementById("statSales").textContent=money(todaySales);
+ document.getElementById("statLow").textContent=products.filter(p=>p.stock<=5).length;
+ const recent=sales.slice(0,5);
+ document.getElementById("recentSales").innerHTML=recent.length?recent.map(s=>`<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>${s.invoice}<br><small class="muted">${new Date(s.date).toLocaleString()}</small></span><b>${money(s.total)}</b></div>`).join(""):'<div class="empty">No sales yet</div>';
+ const low=products.filter(p=>p.stock<=5);
+ document.getElementById("lowStock").innerHTML=low.length?low.map(p=>`<div style="padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>${p.emoji} ${p.name}</span><span class="badge ${p.stock===0?'out':'low'}">${p.stock} ${p.unit}</span></div>`).join(""):'<div class="empty">All stock levels are healthy 🎉</div>';
+}
+function updateCategories(){
+ const cats=[...new Set(products.map(p=>p.category))].sort();
+ document.getElementById("categoryFilter").innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option>${c}</option>`).join("");
+}
+function renderProducts(){
+ updateCategories();
+ const q=(document.getElementById("productSearch")?.value||"").toLowerCase();
+ const cat=document.getElementById("categoryFilter")?.value||"";
+ const list=products.filter(p=>(p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q))&&(!cat||p.category===cat));
+ document.getElementById("productTable").innerHTML=list.length?list.map(p=>{
+ const status=p.stock===0?'<span class="badge out">Out of Stock</span>':p.stock<=5?'<span class="badge low">Low Stock</span>':'<span class="badge good">In Stock</span>';
+ return `<tr><td>${p.emoji} <b>${p.name}</b></td><td>${p.category}</td><td>${money(p.price)} / ${p.unit}</td><td>${p.stock}</td><td>${status}</td><td><div class="actions"><button class="btn-secondary" onclick="editProduct(${p.id})">✏️</button><button class="btn-danger" onclick="deleteProduct(${p.id})">🗑️</button></div></td></tr>`}).join(""):'<tr><td colspan="6" class="empty">No products found</td></tr>';
+}
+function openProductModal(id=null){
+ document.getElementById("productModal").classList.add("show");
+ document.getElementById("modalTitle").textContent=id?"Edit Product":"Add Product";
+ if(id){
+  const p=products.find(x=>x.id===id);
+  document.getElementById("productId").value=p.id;document.getElementById("pName").value=p.name;document.getElementById("pCategory").value=p.category;document.getElementById("pPrice").value=p.price;document.getElementById("pStock").value=p.stock;document.getElementById("pUnit").value=p.unit;document.getElementById("pEmoji").value=p.emoji;
+ }else document.querySelector("#productModal form").reset();
+}
+function closeProductModal(){document.getElementById("productModal").classList.remove("show")}
+function editProduct(id){openProductModal(id)}
+function saveProduct(e){
+ e.preventDefault();
+ const id=Number(document.getElementById("productId").value);
+ const data={name:pName.value.trim(),category:pCategory.value,price:Number(pPrice.value),stock:Number(pStock.value),unit:pUnit.value,emoji:pEmoji.value||"🛒"};
+ if(id){const i=products.findIndex(p=>p.id===id);products[i]={...products[i],...data};toast("Product updated");}
+ else{products.push({id:Date.now(),...data});toast("Product added");}
+ saveData();closeProductModal();renderProducts();renderDashboard();
+}
+function deleteProduct(id){
+ const p=products.find(x=>x.id===id);if(confirm(`Delete ${p.name}?`)){products=products.filter(x=>x.id!==id);saveData();renderProducts();renderDashboard();toast("Product deleted")}
+}
+function renderBillProducts(){
+ const q=(document.getElementById("billSearch")?.value||"").toLowerCase();
+ const list=products.filter(p=>p.stock>0&&p.name.toLowerCase().includes(q));
+ document.getElementById("billProducts").innerHTML=list.map(p=>`<div class="product"><div class="emoji">${p.emoji}</div><h3>${p.name}</h3><p>${p.stock} ${p.unit} available</p><div class="price">${money(p.price)}</div><button class="btn btn-primary" onclick="addToCart(${p.id})">Add to Cart</button></div>`).join("")||'<div class="empty">No products available</div>';
+ renderCart();
+}
+function addToCart(id){
+ const p=products.find(x=>x.id===id), item=cart.find(x=>x.id===id);
+ if(item){if(item.qty<p.stock)item.qty++;else return toast("Not enough stock")}
+ else cart.push({id,qty:1});
+ renderCart();
+}
+function changeQty(id,d){
+ const item=cart.find(x=>x.id===id),p=products.find(x=>x.id===id);if(!item)return;
+ item.qty+=d;if(item.qty<=0)cart=cart.filter(x=>x.id!==id);else if(item.qty>p.stock)item.qty=p.stock;renderCart();
+}
+function clearCart(){cart=[];renderCart()}
+function renderCart(){
+ const box=document.getElementById("cartItems");
+ if(!cart.length){box.innerHTML='<div class="empty">Cart is empty<br>Choose products to create a bill.</div>';document.getElementById("cartTotal").textContent="₹0";return}
+ let total=0;
+ box.innerHTML=cart.map(i=>{const p=products.find(x=>x.id===i.id),sub=p.price*i.qty;total+=sub;return `<div class="cart-item"><div><b>${p.emoji} ${p.name}</b><br><small>${money(p.price)} × ${i.qty}</small></div><div style="text-align:right"><b>${money(sub)}</b><div class="qty"><button onclick="changeQty(${p.id},-1)">−</button><span>${i.qty}</span><button onclick="changeQty(${p.id},1)">+</button></div></div></div>`}).join("");
+ document.getElementById("cartTotal").textContent=money(total);
+}
+function checkout(){
+ if(!cart.length)return toast("Cart is empty");
+ let total=0;
+ cart.forEach(i=>{const p=products.find(x=>x.id===i.id);p.stock-=i.qty;total+=p.price*i.qty});
+ const sale={invoice:"INV-"+Date.now().toString().slice(-7),date:new Date().toISOString(),items:cart.map(i=>{const p=products.find(x=>x.id===i.id);return {name:p.name,qty:i.qty,price:p.price,subtotal:p.price*i.qty}}),total};
+ sales.unshift(sale);saveData();cart=[];renderCart();renderBillProducts();renderDashboard();renderSales();showInvoice(sale);toast("Sale completed successfully");
+}
+function renderSales(){
+ document.getElementById("salesTable").innerHTML=sales.length?sales.map(s=>`<tr><td><b>${s.invoice}</b></td><td>${new Date(s.date).toLocaleString()}</td><td>${s.items.reduce((a,i)=>a+i.qty,0)}</td><td><b>${money(s.total)}</b></td></tr>`).join(""):'<tr><td colspan="4" class="empty">No sales recorded</td></tr>';
+}
+function clearSales(){if(confirm("Clear all sales history?")){sales=[];saveData();renderSales();renderDashboard();toast("Sales history cleared")}}
+function showInvoice(s){
+ const inv=document.getElementById("invoicePage");
+ inv.innerHTML=`<div class="invoice"><div class="invoice-head"><div><h1>FreshMart</h1><p>Grocery Store Management</p></div><div style="text-align:right"><b>${s.invoice}</b><br>${new Date(s.date).toLocaleString()}</div></div><table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>${s.items.map(i=>`<tr><td>${i.name}</td><td>${i.qty}</td><td>${money(i.price)}</td><td>${money(i.subtotal)}</td></tr>`).join("")}</tbody></table><div class="total"><span>Grand Total</span><span>${money(s.total)}</span></div><p style="text-align:center;color:#6b7280">Thank you for shopping with FreshMart! 🛒</p><button class="btn btn-primary no-print" style="margin-top:20px" onclick="window.print()">🖨️ Print Invoice</button><button class="btn btn-secondary no-print" style="margin-top:20px" onclick="showPage('billing')">Back to Billing</button></div>`;
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));inv.classList.add("active");document.getElementById("pageTitle").textContent="Invoice";
+}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+renderDashboard();renderProducts();renderBillProducts();renderSales();
+</script>
+</body>
+</html>
