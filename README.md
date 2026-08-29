@@ -5,6 +5,7 @@ A modern and user-friendly **Grocery Store Management Website** designed to simp
 ## 📌 Project Overview
 
 The Grocery Store Management Website is a web-based application that helps manage grocery products and customer orders digitally.
+project link: file:///C:/Users/DELL/Desktop/files/grocery_store_management.html
 
 It provides features such as:
 
